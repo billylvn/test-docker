@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_budget_planning_user,fs17_simple_budget.budget.planning,model_budget_planning,base.group_user,1,1,1,1
+access_budget_planning_line_user,fs17_simple_budget.budget.planning.line,model_budget_planning_line,base.group_user,1,1,1,1
+access_budget_realization_user,fs17_simple_budget.budget.realization,model_budget_realization,base.group_user,1,1,1,1
+access_budget_realization_line_user,fs17_simple_budget.budget.realization.line,model_budget_realization_line,base.group_user,1,1,1,1
+access_budget_category_user,fs17_simple_budget.budget.category,model_budget_category,base.group_user,1,1,1,1
+access_budget_analysis_user,fs17_simple_budget.budget.analysis,model_budget_analysis,base.group_user,1,1,1,1
+access_income_category_user,fs17_simple_budget.income.category,model_income_category,base.group_user,1,1,1,1
+access_income_planning_line_user,fs17_simple_budget.income.planning.line,model_income_planning_line,base.group_user,1,1,1,1

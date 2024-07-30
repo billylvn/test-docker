@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data>
+
+        <!-- Form -->
+        <record id="budget_planning_view_form" model="ir.ui.view">
+            <field name="name">budget.planning.view.form</field>
+            <field name="model">budget.planning</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <header>
+                        <field name="state" widget="statusbar" statusbar_visible='draft,run'/>
+                        <button string="Submit" name="button_run" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                        <button string="Close" name="button_lock" type="object" class="oe_highlight" invisible="state != 'run'" confirm="Are you sure to close this budget planning? this action will clear a remaining amount."/>
+                        <button string="Set to Draft" name="button_draft" type="object" invisible="state != 'run'"/>
+                    </header>
+                    <div class="alert alert-danger" role="alert" style="margin-bottom:0px; text-align: center" invisible="difference &gt;= 0">
+                        Overbudget!
+                    </div>
+                    <sheet>
+                        <field name="active" invisible='1'/>
+                        <field name="currency_id" invisible='1'/>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="show_realization" type="object" class="oe_stat_button" icon="fa-money" invisible="state == 'draft'">
+                                <field name="count_realization" string="Realization" widget="statinfo"/>
+                            </button>
+                        </div>
+                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active == True"/>
+                        <div class='oe_title'>
+                            <h1>
+                                <field name="description" readonly="state != 'draft'" required='1'/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="effective_date" readonly="state != 'draft'" required='1'/>
+                                <field name="planned_balance" />
+                                <field name="ending_balance" invisible="state == 'draft'"/>
+                                <field name="difference" invisible="state == 'draft'"/>
+                            </group>
+                            <group>
+                                <field name="name" readonly='1' />
+                                <field name="total_income" invisible="state == 'draft'"/>
+                                <field name="consumed_balance" invisible="state == 'draft'"/>
+                                <field name="consumed" string="Percentage" widget="progressbar" invisible="state == 'draft'"/>
+                            </group>
+                        </group>
+                        <separator string="Income" />
+                        <field name="income_line_ids" readonly="state == 'done'">
+                            <tree editable='bottom'>
+                                <field name="category_id" required="1"/>
+                                <field name="name" required="1"/>
+                                <field name="planned_amount" string="Planned" sum="Total"/>
+                                <field name="realization_amount" string="Realization" column_invisible="parent.state == 'draft'" sum="Total"/>
+                                <field name="currency_id" column_invisible='1'/>
+                            </tree>
+                        </field>
+                        <separator string="Expenses" />
+                        <notebook>
+                            <page name="planning" string="Planning">
+                                <field name="line_ids" readonly="state != 'draft'">
+                                    <tree editable='bottom' decoration-danger="remaining &lt; 0" decoration-info="consumed &gt; 0 and consumed &lt; 50" decoration-warning="consumed &gt;= 50 and consumed &lt; 100" decoration-success="consumed &gt;= 100 and consumed &lt; 101" >
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="category_id" required="1"/>
+                                        <field name="name" required='1'/>
+                                        <field name="amount" string="Planned" required='1' sum="Total"/>
+                                        <field name="realization" string="Realization" sum="Total" column_invisible="parent.state == 'draft'"/>
+                                        <field name="remaining" string="Remaining" sum="Total" column_invisible="parent.state == 'draft'"/>
+                                        <field name="forecasted_amount" string="Forecasted" column_invisible="parent.state == 'draft'" sum="Total Forecasted" optional='hide'/>
+                                        <field name="consumed" column_invisible="parent.state == 'draft'" widget="progressbar"/>
+                                        <field name="is_active" widget="boolean_toggle"/>
+                                        <field name="currency_id" column_invisible='1'/>
+                                        <button name="show_realization" type="object" icon="fa-bars" title="Realization" column_invisible="parent.state == 'draft'"/>
+                                    </tree>
+                                    <kanban>
+                                        <templates>
+                                            <field name="currency_id" invisible="1"/>
+                                            <t t-name="kanban-box">
+                                                <div t-attf-class="oe_kanban_global_click">
+                                                    <div>
+                                                        <span class="o_kanban_record_title">
+                                                            <strong><field name="name" /></strong>
+                                                        </span>
+                                                    </div>
+                                                    <hr class="mt4 mb8"/>
+                                                    <div class="o_kanban_record_subtitle">
+                                                        Category:
+                                                        <field name="category_id" />
+                                                        <br/>
+                                                        Planned Amount:
+                                                        <field name="amount"/>
+                                                        <br/>
+                                                        Realization:
+                                                        <field name="realization"/>
+                                                        <br/>
+                                                        Forecasted:
+                                                        <field name="forecasted_amount"/>
+                                                        <br/>
+                                                        Remaining Amount:
+                                                        <field name="remaining"/>
+                                                        <br/>
+                                                        Consumed:
+                                                        <field name="consumed" widget="progressbar" decoration-danger="remaining &lt; 0" decoration-info="consumed &gt; 0 and consumed &lt; 50" decoration-warning="consumed &gt;= 50 and consumed &lt; 100" decoration-success="consumed &gt;= 100 and consumed &lt; 101"/>
+
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </templates>
+                                    </kanban>
+                                    <form string="">
+                                        <header>
+                                            <button string="Show Realization" name="show_realization" type="object" icon="fa-bars" title="Show Realization"/>
+                                        </header>
+                                        <sheet>
+                                            <field name="currency_id" invisible="1"/>
+                                            <div class='oe_title'>
+                                                <h1>
+                                                    <field name="name" required='1'/>
+                                                </h1>
+                                            </div>
+                                            <group col='4'>
+                                                <field name="category_id" required="1"/>
+                                                <field name="amount" string="Planned Amount" required='1'/>
+                                                <field name="realization" invisible="parent.state == 'draft'"/>
+                                                <field name="remaining" invisible="parent.state == 'draft'"/>
+                                                <field name="is_active" widget="boolean_toggle"/>
+                                            </group>
+                                        </sheet>
+                                    </form>
+                                </field>
+                            </page>
+                            <page name="realization" string="Realization" invisible="state == 'draft'">
+                                <field name="realization_line_ids" readonly='1'/>
+                            </page>
+                        </notebook>
+                        <group class="oe_subtotal_footer oe_right">
+                            <field name="planned_expense_amount" string="Planned" class="oe_subtotal_footer" />
+                            <field name="realization_expense_amount" string="Realization" class="oe_subtotal_footer" />
+                            <field name="remaining_expense_amount" string="Remaining" class="oe_subtotal_footer_separator" />
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Kanban -->
+        <record id="budget_planning_view_kanban" model="ir.ui.view">
+            <field name="name">budget.planning.view.kanban</field>
+            <field name="model">budget.planning</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_global_click">
+                                <div>
+                                    <span class="o_kanban_record_title">
+                                        <strong><field name="description" /></strong>
+                                    </span>
+                                </div>
+                                <hr class="mt4 mb8"/>
+                                <div class="o_kanban_record_subtitle">
+                                    <field name="name" />
+                                    <br/>
+                                    Effective Date:
+                                    <field name="effective_date"/>
+                                    <br/>
+                                    <field name="consumed" widget="progressbar"/>
+                                    <br/>
+                                    Status: 
+                                    <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'run'"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Tree -->
+        <record id="budget_planning_view_tree" model="ir.ui.view">
+            <field name="name">budget.planning.view.tree</field>
+            <field name="model">budget.planning</field>
+            <field name="arch" type="xml">
+                <tree decoration-danger="difference &lt; 0">
+                    <field name="description" />
+                    <field name="name" />
+                    <field name="effective_date" />
+                    <field name="planned_balance" optional="hide"/>
+                    <field name="consumed" widget="progressbar"/>
+                    <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'run'"/>
+                    <field name="currency_id" column_invisible='1'/>
+                    <field name="active" column_invisible='1'/>
+                    <field name="difference" column_invisible='1'/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search -->
+        <record id="budget_planning_view_search" model="ir.ui.view">
+            <field name="name">budget.planning.view.search</field>
+            <field name="model">budget.planning</field>
+            <field name="arch" type="xml">
+                <search string="">
+                    <field name="name" />
+                    <field name="effective_date" />
+                    <filter name="archived" string="Archived" domain="[('active', '=', False)]" />
+                </search>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="budget_planning_action" model="ir.actions.act_window">
+            <field name="name">Budget Planning</field>
+            <field name="res_model">budget.planning</field>
+            <field name="view_mode">tree,kanban,form</field>
+        </record>
+
+        <!-- Sequence -->
+        <record id="seq_budget_planning" model="ir.sequence">
+            <field name="name">Seq. Budget Planning</field>
+            <field name="code">budget.planning</field>
+            <field name="prefix">BP/%(y)s/%(month)s/</field>
+            <field name="padding">5</field>
+        </record>
+
+    </data>
+
+
+</odoo>
