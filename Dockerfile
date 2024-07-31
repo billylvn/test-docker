@@ -99,7 +99,6 @@ COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
 
 RUN pip3 install simplejson
 
-COPY ./addons_source /opt/addons
 # Set default user when running the container
 USER odoo
 
